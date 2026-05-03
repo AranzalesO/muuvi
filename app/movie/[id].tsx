@@ -1,4 +1,4 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 
 export default function MovieDetailRoute() {
@@ -9,6 +9,12 @@ export default function MovieDetailRoute() {
       <Stack.Screen options={{ title: 'Movie detail' }} />
       <Text style={styles.title}>Movie detail</Text>
       <Text style={styles.copy}>Route parameter: {id}</Text>
+      <Link href="/" style={styles.link}>
+        Back to movies
+      </Link>
+      <Link href="/watchlist" style={styles.link}>
+        Open watchlist
+      </Link>
     </View>
   );
 }
@@ -23,6 +29,11 @@ const styles = StyleSheet.create({
   copy: {
     color: '#4b5563',
     fontSize: 16,
+  },
+  link: {
+    color: '#2563eb',
+    fontSize: 16,
+    fontWeight: '600',
   },
   title: {
     fontSize: 28,

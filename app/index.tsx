@@ -6,6 +6,9 @@ export default function HomeRoute() {
     <View style={styles.container}>
       <Text style={styles.title}>Muuvi</Text>
       <Text style={styles.copy}>Base route for the movies feed.</Text>
+      <Link href="/movie/1" style={styles.link}>
+        Open movie placeholder
+      </Link>
       <Link href="/watchlist" style={styles.link}>
         Open watchlist
       </Link>
