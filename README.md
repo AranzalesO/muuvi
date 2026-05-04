@@ -242,7 +242,7 @@ Al abrir una película se cargan detalles, géneros, descripción y reparto. Si 
 
 ### Filtro por letra y reparto balanceado
 
-El filtro no se ejecuta dentro de componentes visuales. El flujo esperado es:
+El filtro se aplica sobre el catálogo completo de TMDB, no solo sobre las películas ya cargadas en el feed. No se ejecuta dentro de componentes visuales. El flujo esperado es:
 
 1. El usuario escribe una letra.
 2. Se aplica debounce.
@@ -251,7 +251,7 @@ El filtro no se ejecuta dentro de componentes visuales. El flujo esperado es:
 5. Se aplican reglas puras de dominio.
 6. Se cachea el resultado para evitar repetir trabajo.
 
-El reparto principal se interpreta usando el orden de relevancia entregado por TMDB. Si no existe una definición externa, se considera un subconjunto inicial del cast como reparto principal.
+El reparto principal se interpreta usando el orden de relevancia entregado por TMDB. Para esta prueba se consideran los primeros 10 a 15 miembros del cast ordenado por TMDB como fuente de verdad.
 
 ### Offline
 
@@ -260,7 +260,9 @@ La app debe seguir siendo navegable sin conexión. Para esto:
 - se persiste el caché de TanStack Query;
 - se persiste la watchlist con Zustand;
 - se muestra un indicador visible de modo offline;
-- se renderiza contenido previamente cargado;
+- se renderiza toda la información previamente cargada;
+- se conserva el detalle completo de películas que el usuario ya navegó;
+- al agregar una película a la watchlist se intenta precargar y persistir su detalle y créditos para mejorar la experiencia offline;
 - se muestran estados vacíos claros cuando un contenido nunca fue cacheado.
 
 ### Watchlist y notificaciones
