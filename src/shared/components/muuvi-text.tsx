@@ -1,13 +1,13 @@
 import type { PropsWithChildren } from 'react';
-import { StyleSheet, Text, type TextStyle } from 'react-native';
+import { StyleSheet, Text, type StyleProp, type TextProps, type TextStyle } from 'react-native';
 
 import { muuviTheme } from '../theme';
 
 type MuuviTextVariant = 'caption' | 'body' | 'lead' | 'title' | 'display';
 
-type MuuviTextProps = PropsWithChildren<{
+type MuuviTextProps = PropsWithChildren<TextProps & {
   color?: keyof typeof muuviTheme.colors;
-  style?: TextStyle;
+  style?: StyleProp<TextStyle>;
   variant?: MuuviTextVariant;
 }>;
 
@@ -16,9 +16,13 @@ export function MuuviText({
   color = 'charcoal',
   style,
   variant = 'body',
+  ...textProps
 }: MuuviTextProps) {
   return (
-    <Text style={[styles.base, styles[variant], { color: muuviTheme.colors[color] }, style]}>
+    <Text
+      style={[styles.base, styles[variant], { color: muuviTheme.colors[color] }, style]}
+      {...textProps}
+    >
       {children}
     </Text>
   );
