@@ -3,6 +3,7 @@ export type {
   CrewMember,
   Movie,
   MovieCredits,
+  MovieDetail,
   MovieDetails,
   MovieGenre,
   MovieId,

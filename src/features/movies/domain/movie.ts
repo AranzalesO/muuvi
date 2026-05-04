@@ -36,6 +36,11 @@ export type MovieDetails = Movie & {
   tagline: string | null;
 };
 
+export type MovieDetail = {
+  credits: MovieCredits;
+  movie: MovieDetails;
+};
+
 export type CastMember = {
   character: string;
   gender: PersonGender;

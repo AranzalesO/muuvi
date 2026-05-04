@@ -32,6 +32,7 @@ export type TmdbMovieDto = {
 export type TmdbMovieDetailsDto = Omit<TmdbMovieDto, 'genre_ids'> & {
   belongs_to_collection: unknown | null;
   budget: number;
+  credits?: TmdbCreditsDto;
   genres: TmdbGenreDto[];
   homepage: string | null;
   imdb_id: string | null;

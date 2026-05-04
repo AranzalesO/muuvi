@@ -1,28 +1,10 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
-import { View } from 'react-native';
+import { useLocalSearchParams } from 'expo-router';
 
-import { MuuviLinkButton, MuuviScreen, MuuviText } from '@/src/shared/components';
-import { muuviTheme } from '@/src/shared/theme';
+import { MovieDetailScreen } from '@/src/features/movies/screens/movie-detail-screen';
 
 export default function MovieDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const movieId = id ? Number(id) : null;
 
-  return (
-    <MuuviScreen>
-      <Stack.Screen options={{ title: 'Movie detail' }} />
-      <View style={{ gap: muuviTheme.spacing.sm }}>
-        <MuuviText variant="caption" color="pasture">
-          Feature placeholder
-        </MuuviText>
-        <MuuviText variant="title">Movie detail</MuuviText>
-        <MuuviText color="charcoalMuted">Route parameter: {id}</MuuviText>
-      </View>
-      <View style={{ gap: muuviTheme.spacing.md }}>
-        <MuuviLinkButton href="/">Back to movies</MuuviLinkButton>
-        <MuuviLinkButton href="/watchlist" variant="secondary">
-          Open watchlist
-        </MuuviLinkButton>
-      </View>
-    </MuuviScreen>
-  );
+  return <MovieDetailScreen movieId={Number.isFinite(movieId) ? movieId : null} />;
 }

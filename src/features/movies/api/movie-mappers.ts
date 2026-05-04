@@ -3,6 +3,7 @@ import type {
   CrewMember,
   Movie,
   MovieCredits,
+  MovieDetail,
   MovieDetails,
   MovieImage,
   PaginatedMovies,
@@ -125,4 +126,17 @@ export const mapTmdbCreditsToMovieCredits = (
   cast: credits.cast.map(mapTmdbCastMemberToCastMember),
   crew: credits.crew.map(mapTmdbCrewMemberToCrewMember),
   movieId: credits.id,
+});
+
+export const mapTmdbMovieDetailsWithCreditsToMovieDetail = (
+  movie: TmdbMovieDetailsDto,
+): MovieDetail => ({
+  credits: movie.credits
+    ? mapTmdbCreditsToMovieCredits(movie.credits)
+    : {
+        cast: [],
+        crew: [],
+        movieId: movie.id,
+      },
+  movie: mapTmdbMovieDetailsToMovieDetails(movie),
 });

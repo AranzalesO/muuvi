@@ -1,8 +1,9 @@
 import { tmdbClient } from '@/src/shared/api/tmdb-client';
 
-import type { MovieCredits, MovieDetails, MovieId, PaginatedMovies } from '../domain/movie';
+import type { MovieCredits, MovieDetail, MovieDetails, MovieId, PaginatedMovies } from '../domain/movie';
 import {
   mapTmdbCreditsToMovieCredits,
+  mapTmdbMovieDetailsWithCreditsToMovieDetail,
   mapTmdbMovieDetailsToMovieDetails,
   mapTmdbPaginatedMoviesToPaginatedMovies,
 } from './movie-mappers';
@@ -15,6 +16,7 @@ import type {
 
 export type MovieRepository = {
   getMovieCredits(movieId: MovieId): Promise<MovieCredits>;
+  getMovieDetail(movieId: MovieId): Promise<MovieDetail>;
   getMovieDetails(movieId: MovieId): Promise<MovieDetails>;
   getPopularMovies(page?: number): Promise<PaginatedMovies>;
   searchMovies(query: string, page?: number): Promise<PaginatedMovies>;
@@ -36,6 +38,15 @@ export const movieRepository: MovieRepository = {
     );
 
     return mapTmdbMovieDetailsToMovieDetails(response);
+  },
+
+  async getMovieDetail(movieId) {
+    const response = await tmdbClient.get<TmdbMovieDetailsDto>(
+      `/movie/${movieId}`,
+      { append_to_response: 'credits' },
+    );
+
+    return mapTmdbMovieDetailsWithCreditsToMovieDetail(response);
   },
 
   async getMovieCredits(movieId) {
