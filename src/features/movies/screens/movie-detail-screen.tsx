@@ -13,6 +13,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { CastMember, MovieDetail, MovieId } from '../domain/movie';
 import { useMovieDetail } from '../hooks/use-movie-detail';
 import { MuuviBrandMark, MuuviText } from '@/src/shared/components';
+import { useNetworkStatus } from '@/src/shared/network';
 import { muuviTheme } from '@/src/shared/theme';
 import { useWatchlistMovieControls } from '@/src/features/watchlist/hooks';
 
@@ -21,7 +22,8 @@ type MovieDetailScreenProps = {
 };
 
 export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
-  const { data, error, isError, isLoading, refetch } = useMovieDetail(movieId);
+  const { isOffline } = useNetworkStatus();
+  const { data, error, fetchStatus, isError, isLoading, refetch } = useMovieDetail(movieId);
 
   if (movieId === null) {
     return (
@@ -35,7 +37,19 @@ export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
     );
   }
 
-  if (isLoading) {
+  if (isOffline && !data && (isLoading || isError || fetchStatus === 'paused')) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <Stack.Screen options={{ title: 'Movie detail' }} />
+        <CenteredState
+          title="This reel is not saved yet"
+          copy="Muuvi can open details offline after a movie has been visited or saved while connected."
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (isLoading && !data) {
     return (
       <SafeAreaView style={styles.screen}>
         <Stack.Screen options={{ title: 'Movie detail' }} />
@@ -47,7 +61,7 @@ export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
     );
   }
 
-  if (isError || !data) {
+  if ((isError || !data) && !data) {
     return (
       <SafeAreaView style={styles.screen}>
         <Stack.Screen options={{ title: 'Movie detail' }} />

@@ -6,14 +6,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MovieCard, MovieListFooter, MovieListHeader, MovieListLoadingState, MovieListState } from '../components';
 import type { Movie } from '../domain/movie';
 import { useInfiniteMovies } from '../hooks/use-infinite-movies';
+import { useNetworkStatus } from '@/src/shared/network';
 import { muuviTheme } from '@/src/shared/theme';
 
 export function MoviesHomeScreen() {
   const [searchValue, setSearchValue] = useState('');
+  const { isOffline } = useNetworkStatus();
   const {
     data,
     error,
     fetchNextPage,
+    fetchStatus,
     hasNextPage,
     isError,
     isFetchingNextPage,
@@ -55,7 +58,22 @@ export function MoviesHomeScreen() {
 
   const keyExtractor = useCallback((item: Movie) => String(item.id), []);
 
-  if (isLoading) {
+  if (isOffline && movies.length === 0 && (isLoading || isError || fetchStatus === 'paused')) {
+    return (
+      <SafeAreaView style={styles.screen}>
+        <MovieListHeader
+          searchValue={searchValue}
+          onSearchChange={setSearchValue}
+        />
+        <MovieListState
+          title="No saved feed yet"
+          copy="Reconnect once to fill the pasture, then Muuvi can show those movies offline."
+        />
+      </SafeAreaView>
+    );
+  }
+
+  if (isLoading && movies.length === 0) {
     return (
       <SafeAreaView style={styles.screen}>
         <MovieListHeader
@@ -67,7 +85,7 @@ export function MoviesHomeScreen() {
     );
   }
 
-  if (isError) {
+  if (isError && movies.length === 0) {
     return (
       <SafeAreaView style={styles.screen}>
         <MovieListHeader
