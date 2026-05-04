@@ -1,20 +1,25 @@
 import { Link } from 'expo-router';
-import { StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, TextInput, View } from 'react-native';
 
 import { MuuviBrandMark, MuuviText } from '@/src/shared/components';
 import { muuviTheme } from '@/src/shared/theme';
 import { useWatchlistStore } from '@/src/features/watchlist/store';
 
 type MovieListHeaderProps = {
+  isSearching?: boolean;
   searchValue: string;
+  resultCount?: number;
   onSearchChange: (value: string) => void;
 };
 
 export function MovieListHeader({
+  isSearching = false,
   onSearchChange,
+  resultCount,
   searchValue,
 }: MovieListHeaderProps) {
   const savedCount = useWatchlistStore((state) => state.movieIds.length);
+  const isSearchActive = searchValue.trim().length > 0;
 
   return (
     <View style={styles.header}>
@@ -32,13 +37,35 @@ export function MovieListHeader({
       </View>
       <TextInput
         value={searchValue}
-        onChangeText={onSearchChange}
-        placeholder="Search loaded movies"
+        onChangeText={(value) => onSearchChange(value.slice(0, 1))}
+        placeholder="Type one letter"
         placeholderTextColor={muuviTheme.colors.ash}
-        style={styles.searchInput}
+        style={[styles.searchInput, isSearchActive && styles.searchInputActive]}
         autoCorrect={false}
+        autoCapitalize="characters"
+        maxLength={1}
         returnKeyType="search"
       />
+      <View style={styles.searchFeedback}>
+        <MuuviText variant="caption" color={isSearchActive ? 'pasture' : 'ash'}>
+          {isSearchActive
+            ? 'Balanced catalog search: title, genres and main cast'
+            : 'Enter a letter to search eligible titles across TMDB'}
+        </MuuviText>
+        {isSearching ? (
+          <View style={styles.searchingPill}>
+            <ActivityIndicator color={muuviTheme.colors.pasture} size="small" />
+            <MuuviText variant="caption" color="pasture">
+              Checking cast
+            </MuuviText>
+          </View>
+        ) : null}
+        {isSearchActive && !isSearching && resultCount !== undefined ? (
+          <MuuviText variant="caption" color="clay">
+            {resultCount} eligible {resultCount === 1 ? 'movie' : 'movies'}
+          </MuuviText>
+        ) : null}
+      </View>
     </View>
   );
 }
@@ -65,6 +92,23 @@ const styles = StyleSheet.create({
     lineHeight: muuviTheme.typography.lineHeight.body,
     paddingHorizontal: muuviTheme.spacing.lg,
     paddingVertical: muuviTheme.spacing.md,
+  },
+  searchFeedback: {
+    gap: muuviTheme.spacing.sm,
+  },
+  searchInputActive: {
+    borderColor: muuviTheme.colors.pasture,
+    borderWidth: 2,
+  },
+  searchingPill: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: muuviTheme.colors.sage,
+    borderRadius: muuviTheme.radii.round,
+    flexDirection: 'row',
+    gap: muuviTheme.spacing.sm,
+    paddingHorizontal: muuviTheme.spacing.md,
+    paddingVertical: muuviTheme.spacing.sm,
   },
   titleGroup: {
     flex: 1,
