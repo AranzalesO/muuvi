@@ -1,7 +1,9 @@
+import { Link } from 'expo-router';
 import { StyleSheet, TextInput, View } from 'react-native';
 
 import { MuuviBrandMark, MuuviText } from '@/src/shared/components';
 import { muuviTheme } from '@/src/shared/theme';
+import { useWatchlistStore } from '@/src/features/watchlist/store';
 
 type MovieListHeaderProps = {
   searchValue: string;
@@ -12,6 +14,8 @@ export function MovieListHeader({
   onSearchChange,
   searchValue,
 }: MovieListHeaderProps) {
+  const savedCount = useWatchlistStore((state) => state.movieIds.length);
+
   return (
     <View style={styles.header}>
       <View style={styles.brandRow}>
@@ -22,6 +26,9 @@ export function MovieListHeader({
           </MuuviText>
           <MuuviText variant="display">Muuvi</MuuviText>
         </View>
+        <Link href="/watchlist" style={styles.watchlistLink}>
+          My list{savedCount > 0 ? ` (${savedCount})` : ''}
+        </Link>
       </View>
       <TextInput
         value={searchValue}
@@ -61,5 +68,17 @@ const styles = StyleSheet.create({
   },
   titleGroup: {
     flex: 1,
+  },
+  watchlistLink: {
+    backgroundColor: muuviTheme.colors.charcoal,
+    borderRadius: muuviTheme.radii.md,
+    color: muuviTheme.colors.milk,
+    fontSize: muuviTheme.typography.size.caption,
+    fontWeight: muuviTheme.typography.weight.bold,
+    lineHeight: muuviTheme.typography.lineHeight.caption,
+    overflow: 'hidden',
+    paddingHorizontal: muuviTheme.spacing.md,
+    paddingVertical: muuviTheme.spacing.sm,
+    textAlign: 'center',
   },
 });

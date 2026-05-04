@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Stack } from 'expo-router';
+import { Link, Stack } from 'expo-router';
 import { useMemo } from 'react';
 import {
   ActivityIndicator,
@@ -133,6 +133,10 @@ function MovieDetailContent({ data }: { data: MovieDetail }) {
               {isSaved ? 'Saved for later' : 'Add to watchlist'}
             </MuuviText>
           </Pressable>
+
+          <Link href="/watchlist" style={styles.watchlistLink}>
+            Open my list
+          </Link>
 
           <GenreChips genres={movie.genres.map((genre) => genre.name)} />
 
@@ -400,6 +404,13 @@ const styles = StyleSheet.create({
   },
   watchlistButtonActive: {
     backgroundColor: muuviTheme.colors.hay,
+  },
+  watchlistLink: {
+    color: muuviTheme.colors.pasture,
+    fontSize: muuviTheme.typography.size.body,
+    fontWeight: muuviTheme.typography.weight.medium,
+    lineHeight: muuviTheme.typography.lineHeight.body,
+    textAlign: 'center',
   },
   watchlistText: {
     fontWeight: muuviTheme.typography.weight.medium,
