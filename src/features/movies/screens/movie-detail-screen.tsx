@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { Stack } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import {
   ActivityIndicator,
   Pressable,
@@ -10,23 +10,18 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { CastMember, MovieId } from '../domain/movie';
+import type { CastMember, MovieDetail, MovieId } from '../domain/movie';
 import { useMovieDetail } from '../hooks/use-movie-detail';
 import { MuuviBrandMark, MuuviText } from '@/src/shared/components';
 import { muuviTheme } from '@/src/shared/theme';
+import { useWatchlistMovieControls } from '@/src/features/watchlist/hooks';
 
 type MovieDetailScreenProps = {
   movieId: MovieId | null;
 };
 
 export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
-  const [isWatchlisted, setIsWatchlisted] = useState(false);
   const { data, error, isError, isLoading, refetch } = useMovieDetail(movieId);
-
-  const mainCast = useMemo(
-    () => data?.credits.cast.slice(0, 12) ?? [],
-    [data?.credits.cast],
-  );
 
   if (movieId === null) {
     return (
@@ -66,8 +61,17 @@ export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
     );
   }
 
+  return <MovieDetailContent data={data} />;
+}
+
+function MovieDetailContent({ data }: { data: MovieDetail }) {
   const { movie } = data;
+  const { isSaved, toggleMovie } = useWatchlistMovieControls(movie);
   const heroImage = movie.backdrop.url ?? movie.poster.url;
+  const mainCast = useMemo(
+    () => data.credits.cast.slice(0, 12),
+    [data.credits.cast],
+  );
 
   return (
     <SafeAreaView style={styles.screen} edges={['left', 'right']}>
@@ -122,11 +126,11 @@ export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
           </View>
 
           <Pressable
-            style={[styles.watchlistButton, isWatchlisted && styles.watchlistButtonActive]}
-            onPress={() => setIsWatchlisted((current) => !current)}
+            style={[styles.watchlistButton, isSaved && styles.watchlistButtonActive]}
+            onPress={toggleMovie}
           >
-            <MuuviText color={isWatchlisted ? 'charcoal' : 'milk'} style={styles.watchlistText}>
-              {isWatchlisted ? 'Saved for later' : 'Add to watchlist'}
+            <MuuviText color={isSaved ? 'charcoal' : 'milk'} style={styles.watchlistText}>
+              {isSaved ? 'Saved for later' : 'Add to watchlist'}
             </MuuviText>
           </Pressable>
 

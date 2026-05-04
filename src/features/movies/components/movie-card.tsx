@@ -6,49 +6,68 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import type { Movie } from '../domain/movie';
 import { MuuviText } from '@/src/shared/components';
 import { muuviTheme } from '@/src/shared/theme';
+import { useWatchlistMovieControls } from '@/src/features/watchlist/hooks';
 
 type MovieCardProps = {
   movie: Movie;
 };
 
 function MovieCardComponent({ movie }: MovieCardProps) {
+  const { isSaved, toggleMovie } = useWatchlistMovieControls(movie);
+
   return (
-    <Link
-      href={{
-        pathname: '/movie/[id]',
-        params: { id: String(movie.id) },
-      }}
-      asChild
-    >
-      <Pressable style={styles.card}>
-        <View style={styles.posterFrame}>
-          {movie.poster.url ? (
-            <Image
-              source={{ uri: movie.poster.url }}
-              style={styles.poster}
-              contentFit="cover"
-              transition={120}
-              recyclingKey={String(movie.id)}
-            />
-          ) : (
-            <View style={styles.posterFallback}>
-              <View style={styles.fallbackSpot} />
-              <MuuviText variant="caption" color="ash">
-                No poster
-              </MuuviText>
-            </View>
-          )}
-        </View>
-        <View style={styles.meta}>
-          <MuuviText style={styles.title} numberOfLines={2}>
-            {movie.title}
-          </MuuviText>
-          <MuuviText variant="caption" color="ash">
-            {movie.releaseDate?.slice(0, 4) ?? 'Coming soon'}
-          </MuuviText>
-        </View>
+    <View style={styles.card}>
+      <Link
+        href={{
+          pathname: '/movie/[id]',
+          params: { id: String(movie.id) },
+        }}
+        asChild
+      >
+        <Pressable>
+          <View style={styles.posterFrame}>
+            {movie.poster.url ? (
+              <Image
+                source={{ uri: movie.poster.url }}
+                style={styles.poster}
+                contentFit="cover"
+                transition={120}
+                recyclingKey={String(movie.id)}
+              />
+            ) : (
+              <View style={styles.posterFallback}>
+                <View style={styles.fallbackSpot} />
+                <MuuviText variant="caption" color="ash">
+                  No poster
+                </MuuviText>
+              </View>
+            )}
+          </View>
+          <View style={styles.meta}>
+            <MuuviText style={styles.title} numberOfLines={2}>
+              {movie.title}
+            </MuuviText>
+            <MuuviText variant="caption" color="ash">
+              {movie.releaseDate?.slice(0, 4) ?? 'Coming soon'}
+            </MuuviText>
+          </View>
+        </Pressable>
+      </Link>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={isSaved ? 'Remove from watchlist' : 'Add to watchlist'}
+        onPress={toggleMovie}
+        style={[styles.watchlistToggle, isSaved && styles.watchlistToggleActive]}
+      >
+        <MuuviText
+          variant="caption"
+          color={isSaved ? 'charcoal' : 'milk'}
+          style={styles.watchlistToggleText}
+        >
+          {isSaved ? 'Saved' : 'Watchlist'}
+        </MuuviText>
       </Pressable>
-    </Link>
+    </View>
   );
 }
 
@@ -78,6 +97,7 @@ const styles = StyleSheet.create({
   meta: {
     gap: muuviTheme.spacing.xs,
     padding: muuviTheme.spacing.md,
+    paddingBottom: muuviTheme.spacing.sm,
   },
   poster: {
     height: '100%',
@@ -95,5 +115,20 @@ const styles = StyleSheet.create({
   },
   title: {
     minHeight: 46,
+  },
+  watchlistToggle: {
+    alignItems: 'center',
+    backgroundColor: muuviTheme.colors.charcoal,
+    borderRadius: muuviTheme.radii.md,
+    margin: muuviTheme.spacing.md,
+    marginTop: 0,
+    paddingHorizontal: muuviTheme.spacing.md,
+    paddingVertical: muuviTheme.spacing.sm,
+  },
+  watchlistToggleActive: {
+    backgroundColor: muuviTheme.colors.hay,
+  },
+  watchlistToggleText: {
+    fontWeight: muuviTheme.typography.weight.bold,
   },
 });
