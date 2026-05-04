@@ -1,39 +1,27 @@
-import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+
+import { MuuviBrandMark, MuuviLinkButton, MuuviScreen, MuuviText } from '@/src/shared/components';
+import { muuviTheme } from '@/src/shared/theme';
 
 export default function HomeRoute() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Muuvi</Text>
-      <Text style={styles.copy}>Base route for the movies feed.</Text>
-      <Link href="/movie/1" style={styles.link}>
-        Open movie placeholder
-      </Link>
-      <Link href="/watchlist" style={styles.link}>
-        Open watchlist
-      </Link>
-    </View>
+    <MuuviScreen>
+      <MuuviBrandMark />
+      <View style={{ gap: muuviTheme.spacing.sm }}>
+        <MuuviText variant="caption" color="pasture">
+          Fresh from the pasture
+        </MuuviText>
+        <MuuviText variant="display">Muuvi</MuuviText>
+        <MuuviText variant="lead" color="charcoalMuted">
+          A clean movie experience with a warm farm-house edge.
+        </MuuviText>
+      </View>
+      <View style={{ gap: muuviTheme.spacing.md }}>
+        <MuuviLinkButton href="/movie/1">Open movie placeholder</MuuviLinkButton>
+        <MuuviLinkButton href="/watchlist" variant="secondary">
+          Open watchlist
+        </MuuviLinkButton>
+      </View>
+    </MuuviScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 12,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  copy: {
-    color: '#4b5563',
-    fontSize: 16,
-  },
-  link: {
-    color: '#2563eb',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-  },
-});

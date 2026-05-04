@@ -4,19 +4,18 @@ import {
   type Theme,
 } from '@react-navigation/native';
 
-const colors = {
-  background: '#f8fafc',
-  border: '#e2e8f0',
-  card: '#ffffff',
-  primary: '#2563eb',
-  text: '#0f172a',
-};
+import { muuviColors } from './tokens';
 
 export const lightNavigationTheme: Theme = {
   ...DefaultTheme,
   colors: {
     ...DefaultTheme.colors,
-    ...colors,
+    background: muuviColors.milk,
+    border: muuviColors.line,
+    card: muuviColors.white,
+    notification: muuviColors.clay,
+    primary: muuviColors.pasture,
+    text: muuviColors.charcoal,
   },
 };
 
@@ -24,6 +23,11 @@ export const darkNavigationTheme: Theme = {
   ...DarkTheme,
   colors: {
     ...DarkTheme.colors,
-    primary: '#93c5fd',
+    background: muuviColors.charcoal,
+    border: '#34302c',
+    card: '#211f1c',
+    notification: muuviColors.hay,
+    primary: muuviColors.butter,
+    text: muuviColors.milk,
   },
 };

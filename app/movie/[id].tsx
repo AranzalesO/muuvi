@@ -1,42 +1,28 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { View } from 'react-native';
+
+import { MuuviLinkButton, MuuviScreen, MuuviText } from '@/src/shared/components';
+import { muuviTheme } from '@/src/shared/theme';
 
 export default function MovieDetailRoute() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   return (
-    <View style={styles.container}>
+    <MuuviScreen>
       <Stack.Screen options={{ title: 'Movie detail' }} />
-      <Text style={styles.title}>Movie detail</Text>
-      <Text style={styles.copy}>Route parameter: {id}</Text>
-      <Link href="/" style={styles.link}>
-        Back to movies
-      </Link>
-      <Link href="/watchlist" style={styles.link}>
-        Open watchlist
-      </Link>
-    </View>
+      <View style={{ gap: muuviTheme.spacing.sm }}>
+        <MuuviText variant="caption" color="pasture">
+          Feature placeholder
+        </MuuviText>
+        <MuuviText variant="title">Movie detail</MuuviText>
+        <MuuviText color="charcoalMuted">Route parameter: {id}</MuuviText>
+      </View>
+      <View style={{ gap: muuviTheme.spacing.md }}>
+        <MuuviLinkButton href="/">Back to movies</MuuviLinkButton>
+        <MuuviLinkButton href="/watchlist" variant="secondary">
+          Open watchlist
+        </MuuviLinkButton>
+      </View>
+    </MuuviScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 12,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  copy: {
-    color: '#4b5563',
-    fontSize: 16,
-  },
-  link: {
-    color: '#2563eb',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-});

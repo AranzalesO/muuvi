@@ -1,39 +1,26 @@
-import { Link } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { View } from 'react-native';
+
+import { MuuviLinkButton, MuuviScreen, MuuviText } from '@/src/shared/components';
+import { muuviTheme } from '@/src/shared/theme';
 
 export default function WatchlistRoute() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Watchlist</Text>
-      <Text style={styles.copy}>Base route for saved movies.</Text>
-      <Link href="/" style={styles.link}>
-        Back to movies
-      </Link>
-      <Link href="/movie/1" style={styles.link}>
-        Open movie placeholder
-      </Link>
-    </View>
+    <MuuviScreen>
+      <View style={{ gap: muuviTheme.spacing.sm }}>
+        <MuuviText variant="caption" color="clay">
+          Saved for later
+        </MuuviText>
+        <MuuviText variant="title">Watchlist</MuuviText>
+        <MuuviText color="charcoalMuted">
+          Your quiet corner for movies worth coming back to.
+        </MuuviText>
+      </View>
+      <View style={{ gap: muuviTheme.spacing.md }}>
+        <MuuviLinkButton href="/">Back to movies</MuuviLinkButton>
+        <MuuviLinkButton href="/movie/1" variant="secondary">
+          Open movie placeholder
+        </MuuviLinkButton>
+      </View>
+    </MuuviScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    gap: 12,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  copy: {
-    color: '#4b5563',
-    fontSize: 16,
-  },
-  link: {
-    color: '#2563eb',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: '700',
-  },
-});
