@@ -15,7 +15,10 @@ import { useMovieDetail } from '../hooks/use-movie-detail';
 import { MuuviBrandMark, MuuviText } from '@/src/shared/components';
 import { useNetworkStatus } from '@/src/shared/network';
 import { muuviTheme } from '@/src/shared/theme';
-import { useWatchlistMovieControls } from '@/src/features/watchlist/hooks';
+import {
+  useCancelWatchlistReminderOnMovieOpen,
+  useWatchlistMovieControls,
+} from '@/src/features/watchlist/hooks';
 
 type MovieDetailScreenProps = {
   movieId: MovieId | null;
@@ -23,6 +26,7 @@ type MovieDetailScreenProps = {
 
 export function MovieDetailScreen({ movieId }: MovieDetailScreenProps) {
   const { isOffline } = useNetworkStatus();
+  useCancelWatchlistReminderOnMovieOpen(movieId);
   const { data, error, fetchStatus, isError, isLoading, refetch } = useMovieDetail(movieId);
 
   if (movieId === null) {

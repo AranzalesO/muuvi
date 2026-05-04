@@ -9,4 +9,5 @@ export type WatchlistMovieInput = Pick<Movie, 'id' | 'poster' | 'releaseDate' | 
 export type WatchlistState = {
   moviesById: Record<MovieId, WatchlistMovie>;
   movieIds: MovieId[];
+  notificationIdsByMovieId: Record<MovieId, string>;
 };

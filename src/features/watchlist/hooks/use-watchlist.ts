@@ -1,13 +1,18 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import { movieRepository } from '@/src/features/movies/api';
 import type { Movie, MovieId } from '@/src/features/movies/domain/movie';
 import { movieDetailQueryKeys } from '@/src/features/movies/hooks/use-movie-detail';
+import {
+  cancelWatchlistReminder,
+  scheduleWatchlistReminder,
+} from '@/src/features/notifications/services';
 import type { WatchlistMovieInput } from '../domain/watchlist-movie';
 import { useWatchlistStore } from '../store/watchlist-store';
 
 const DETAIL_PREFETCH_STALE_TIME = 1000 * 60 * 60;
+const reminderRequestVersionsByMovieId = new Map<MovieId, number>();
 
 const toWatchlistMovieInput = (movie: WatchlistMovieInput): WatchlistMovieInput => ({
   id: movie.id,
@@ -15,6 +20,60 @@ const toWatchlistMovieInput = (movie: WatchlistMovieInput): WatchlistMovieInput 
   releaseDate: movie.releaseDate,
   title: movie.title,
 });
+
+const bumpReminderRequestVersion = (movieId: MovieId) => {
+  const nextVersion = (reminderRequestVersionsByMovieId.get(movieId) ?? 0) + 1;
+  reminderRequestVersionsByMovieId.set(movieId, nextVersion);
+
+  return nextVersion;
+};
+
+const scheduleReminderForMovie = (movie: WatchlistMovieInput) => {
+  const requestVersion = bumpReminderRequestVersion(movie.id);
+  const existingNotificationId =
+    useWatchlistStore.getState().notificationIdsByMovieId[movie.id];
+
+  if (existingNotificationId) {
+    useWatchlistStore.getState().clearReminderNotificationId(movie.id);
+    void cancelWatchlistReminder(existingNotificationId).catch(() => {});
+  }
+
+  void scheduleWatchlistReminder({
+    movieId: movie.id,
+    movieTitle: movie.title,
+  })
+    .then((notificationId) => {
+      if (!notificationId) {
+        return;
+      }
+
+      const state = useWatchlistStore.getState();
+      const isLatestRequest = reminderRequestVersionsByMovieId.get(movie.id) === requestVersion;
+
+      if (state.moviesById[movie.id] && isLatestRequest) {
+        state.setReminderNotificationId(movie.id, notificationId);
+        return;
+      }
+
+      void cancelWatchlistReminder(notificationId).catch(() => {});
+    })
+    .catch(() => {
+      if (reminderRequestVersionsByMovieId.get(movie.id) === requestVersion) {
+        useWatchlistStore.getState().clearReminderNotificationId(movie.id);
+      }
+    });
+};
+
+const cancelStoredReminderForMovie = (movieId: MovieId) => {
+  bumpReminderRequestVersion(movieId);
+
+  const notificationId = useWatchlistStore.getState().notificationIdsByMovieId[movieId];
+  useWatchlistStore.getState().clearReminderNotificationId(movieId);
+
+  if (notificationId) {
+    void cancelWatchlistReminder(notificationId).catch(() => {});
+  }
+};
 
 export function useWatchlist() {
   const queryClient = useQueryClient();
@@ -42,7 +101,9 @@ export function useWatchlist() {
 
   const addMovie = useCallback(
     (movie: WatchlistMovieInput) => {
-      addMovieToStore(toWatchlistMovieInput(movie));
+      const watchlistMovie = toWatchlistMovieInput(movie);
+      addMovieToStore(watchlistMovie);
+      scheduleReminderForMovie(watchlistMovie);
       void prefetchMovieDetail(movie.id).catch(() => {
         // Prefetch is opportunistic; the watchlist should still work offline with saved metadata.
       });
@@ -52,6 +113,7 @@ export function useWatchlist() {
 
   const removeMovie = useCallback(
     (movieId: MovieId) => {
+      cancelStoredReminderForMovie(movieId);
       removeMovieFromStore(movieId);
     },
     [removeMovieFromStore],
@@ -96,7 +158,9 @@ export function useWatchlistMovieControls(movie: WatchlistMovieInput) {
   const removeMovieFromStore = useWatchlistStore((state) => state.removeMovie);
 
   const addMovie = useCallback(() => {
-    addMovieToStore(toWatchlistMovieInput(movie));
+    const watchlistMovie = toWatchlistMovieInput(movie);
+    addMovieToStore(watchlistMovie);
+    scheduleReminderForMovie(watchlistMovie);
     void queryClient
       .prefetchQuery({
         gcTime: DETAIL_PREFETCH_STALE_TIME,
@@ -110,6 +174,7 @@ export function useWatchlistMovieControls(movie: WatchlistMovieInput) {
   }, [addMovieToStore, movie, queryClient]);
 
   const removeMovie = useCallback(() => {
+    cancelStoredReminderForMovie(movie.id);
     removeMovieFromStore(movie.id);
   }, [movie.id, removeMovieFromStore]);
 
@@ -127,4 +192,18 @@ export function useWatchlistMovieControls(movie: WatchlistMovieInput) {
     savedMovie,
     toggleMovie,
   };
+}
+
+export function useCancelWatchlistReminderOnMovieOpen(movieId: MovieId | null) {
+  const notificationId = useWatchlistStore((state) =>
+    movieId === null ? undefined : state.notificationIdsByMovieId[movieId],
+  );
+
+  useEffect(() => {
+    if (movieId === null || !notificationId) {
+      return;
+    }
+
+    cancelStoredReminderForMovie(movieId);
+  }, [movieId, notificationId]);
 }

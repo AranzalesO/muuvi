@@ -1,1 +1,6 @@
-export { useWatchlist, useWatchlistItem, useWatchlistMovieControls } from './use-watchlist';
+export {
+  useCancelWatchlistReminderOnMovieOpen,
+  useWatchlist,
+  useWatchlistItem,
+  useWatchlistMovieControls,
+} from './use-watchlist';

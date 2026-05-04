@@ -9,6 +9,10 @@ import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 
 import { useColorScheme } from '@/hooks/use-color-scheme';
+import {
+  configureWatchlistReminderPresentation,
+  WatchlistReminderNotificationHandler,
+} from '@/src/features/notifications';
 import { OfflineBanner } from '@/src/shared/components';
 import { configureOnlineManager } from '@/src/shared/network';
 import { darkNavigationTheme, lightNavigationTheme } from '@/src/shared/theme/navigation-theme';
@@ -36,7 +40,10 @@ export default function RootLayout() {
     }),
   );
 
-  useEffect(() => configureOnlineManager(), []);
+  useEffect(() => {
+    configureWatchlistReminderPresentation();
+    return configureOnlineManager();
+  }, []);
 
   return (
     <PersistQueryClientProvider
@@ -47,6 +54,7 @@ export default function RootLayout() {
       }}
     >
       <ThemeProvider value={colorScheme === 'dark' ? darkNavigationTheme : lightNavigationTheme}>
+        <WatchlistReminderNotificationHandler />
         <Stack>
           <Stack.Screen name="index" options={{ title: 'Muuvi' }} />
           <Stack.Screen name="movie/[id]" options={{ title: 'Detalle' }} />

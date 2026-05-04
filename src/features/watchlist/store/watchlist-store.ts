@@ -7,7 +7,9 @@ import type { WatchlistMovie, WatchlistMovieInput, WatchlistState } from '../dom
 
 type WatchlistActions = {
   addMovie: (movie: WatchlistMovieInput, savedAt?: string) => void;
+  clearReminderNotificationId: (movieId: MovieId) => void;
   removeMovie: (movieId: MovieId) => void;
+  setReminderNotificationId: (movieId: MovieId, notificationId: string) => void;
 };
 
 type WatchlistStore = WatchlistState & WatchlistActions;
@@ -15,7 +17,22 @@ type WatchlistStore = WatchlistState & WatchlistActions;
 const initialState: WatchlistState = {
   movieIds: [],
   moviesById: {},
+  notificationIdsByMovieId: {},
 };
+
+function migrateWatchlistState(persistedState: unknown): WatchlistState {
+  if (!persistedState || typeof persistedState !== 'object') {
+    return initialState;
+  }
+
+  const state = persistedState as Partial<WatchlistState>;
+
+  return {
+    movieIds: state.movieIds ?? [],
+    moviesById: state.moviesById ?? {},
+    notificationIdsByMovieId: state.notificationIdsByMovieId ?? {},
+  };
+}
 
 export const useWatchlistStore = create<WatchlistStore>()(
   persist(
@@ -37,20 +54,40 @@ export const useWatchlistStore = create<WatchlistStore>()(
             },
           };
         }),
+      clearReminderNotificationId: (movieId) =>
+        set((state) => {
+          const { [movieId]: _removedNotificationId, ...notificationIdsByMovieId } =
+            state.notificationIdsByMovieId;
+
+          return {
+            notificationIdsByMovieId,
+          };
+        }),
       removeMovie: (movieId) =>
         set((state) => {
           const { [movieId]: _removedMovie, ...moviesById } = state.moviesById;
+          const { [movieId]: _removedNotificationId, ...notificationIdsByMovieId } =
+            state.notificationIdsByMovieId;
 
           return {
             movieIds: state.movieIds.filter((id) => id !== movieId),
             moviesById,
+            notificationIdsByMovieId,
           };
         }),
+      setReminderNotificationId: (movieId, notificationId) =>
+        set((state) => ({
+          notificationIdsByMovieId: {
+            ...state.notificationIdsByMovieId,
+            [movieId]: notificationId,
+          },
+        })),
     }),
     {
+      migrate: migrateWatchlistState,
       name: 'muuvi-watchlist',
       storage: createJSONStorage(() => AsyncStorage),
-      version: 1,
+      version: 2,
     },
   ),
 );
