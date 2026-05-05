@@ -8,6 +8,12 @@ import {
   cancelWatchlistReminder,
   scheduleWatchlistReminder,
 } from '@/src/features/notifications/services';
+import {
+  getNextReminderRequestVersion,
+  shouldCancelReminderOnMovieOpen,
+  shouldReplaceExistingReminder,
+  shouldStoreScheduledReminder,
+} from '@/src/features/notifications/domain/watchlist-reminder-rules';
 import type { WatchlistMovieInput } from '../domain/watchlist-movie';
 import { useWatchlistStore } from '../store/watchlist-store';
 
@@ -22,7 +28,7 @@ const toWatchlistMovieInput = (movie: WatchlistMovieInput): WatchlistMovieInput 
 });
 
 const bumpReminderRequestVersion = (movieId: MovieId) => {
-  const nextVersion = (reminderRequestVersionsByMovieId.get(movieId) ?? 0) + 1;
+  const nextVersion = getNextReminderRequestVersion(reminderRequestVersionsByMovieId, movieId);
   reminderRequestVersionsByMovieId.set(movieId, nextVersion);
 
   return nextVersion;
@@ -33,7 +39,7 @@ const scheduleReminderForMovie = (movie: WatchlistMovieInput) => {
   const existingNotificationId =
     useWatchlistStore.getState().notificationIdsByMovieId[movie.id];
 
-  if (existingNotificationId) {
+  if (shouldReplaceExistingReminder(existingNotificationId)) {
     useWatchlistStore.getState().clearReminderNotificationId(movie.id);
     void cancelWatchlistReminder(existingNotificationId).catch(() => {});
   }
@@ -48,9 +54,15 @@ const scheduleReminderForMovie = (movie: WatchlistMovieInput) => {
       }
 
       const state = useWatchlistStore.getState();
-      const isLatestRequest = reminderRequestVersionsByMovieId.get(movie.id) === requestVersion;
 
-      if (state.moviesById[movie.id] && isLatestRequest) {
+      if (
+        shouldStoreScheduledReminder({
+          currentRequestVersion: reminderRequestVersionsByMovieId.get(movie.id),
+          isMovieSaved: Boolean(state.moviesById[movie.id]),
+          notificationId,
+          requestVersion,
+        })
+      ) {
         state.setReminderNotificationId(movie.id, notificationId);
         return;
       }
@@ -200,7 +212,7 @@ export function useCancelWatchlistReminderOnMovieOpen(movieId: MovieId | null) {
   );
 
   useEffect(() => {
-    if (movieId === null || !notificationId) {
+    if (!shouldCancelReminderOnMovieOpen(movieId, notificationId)) {
       return;
     }
 

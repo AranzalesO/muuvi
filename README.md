@@ -303,6 +303,9 @@ npm run android
 npm run ios
 npm run lint
 npm run test
+npm run test:ci
+npm run test:watch
+npm run validate
 ```
 
 ## Variables de entorno
@@ -315,7 +318,7 @@ El token no debe subirse al repositorio. El archivo `.env.example` documenta las
 
 ## Pruebas recomendadas
 
-Las pruebas unitarias deben cubrir principalmente reglas de dominio:
+El proyecto usa Jest con `jest-expo` y React Native Testing Library. Las pruebas unitarias cubren principalmente reglas de dominio:
 
 - título comienza con una letra ignorando mayúsculas/minúsculas;
 - mínimo de géneros;
@@ -324,6 +327,22 @@ Las pruebas unitarias deben cubrir principalmente reglas de dominio:
 - deduplicación de recordatorios;
 - cancelación de recordatorio al abrir una película;
 - persistencia básica de watchlist.
+
+También hay pruebas ligeras de integración para hooks/componentes críticos:
+
+- `useWatchlist`, con TanStack Query y servicios de notificaciones mockeados;
+- estados de lista con React Native Testing Library.
+
+Comandos:
+
+```bash
+npm run test       # Jest
+npm run test:ci    # Jest serial para CI
+npm run test:watch # Jest en watch mode
+npm run validate   # TypeScript + Jest
+```
+
+No se configuró Detox. Si se agrega E2E más adelante, Maestro es la opción recomendada para documentar flujos críticos como búsqueda, watchlist, modo offline y recordatorios.
 
 ## Proceso de desarrollo
 
