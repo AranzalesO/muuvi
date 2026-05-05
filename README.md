@@ -36,6 +36,18 @@ EXPO_PUBLIC_TMDB_ACCESS_TOKEN=your_tmdb_access_token
 npm run start
 ```
 
+Por defecto este comando ejecuta Expo en modo offline (`expo start --offline`) para evitar fallos del CLI al consultar versiones remotas de dependencias. Si se quiere usar el flujo online normal de Expo:
+
+```bash
+npm run start:online
+```
+
+Para limpiar el caché de Metro sin depender de servicios remotos:
+
+```bash
+npm run start:clear
+```
+
 También se puede ejecutar directamente en plataforma:
 
 ```bash
@@ -284,7 +296,9 @@ Reglas implementadas:
 ## Scripts
 
 ```bash
-npm run start
+npm run start        # Expo en modo offline
+npm run start:online # Expo con validaciones remotas del CLI
+npm run start:clear  # Limpia caché y arranca offline
 npm run android
 npm run ios
 npm run lint
