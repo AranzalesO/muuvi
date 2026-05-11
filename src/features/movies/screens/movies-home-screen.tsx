@@ -185,7 +185,7 @@ export function MoviesHomeScreen() {
             title={isSearchActive ? 'No balanced matches' : 'No titles in this field'}
             copy={
               isSearchActive
-                ? 'No movies starting with that letter met the genre and main-cast balance rules.'
+                ? 'No movies in this search pass met the title, genre and main-cast balance rules.'
                 : 'Try a gentler search or clear the text to see the full pasture.'
             }
           />

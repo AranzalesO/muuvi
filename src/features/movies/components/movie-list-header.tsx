@@ -49,14 +49,14 @@ export function MovieListHeader({
       <View style={styles.searchFeedback}>
         <MuuviText variant="caption" color={isSearchActive ? 'pasture' : 'ash'}>
           {isSearchActive
-            ? 'Balanced catalog search: title, genres and main cast'
+            ? 'Balanced search: title, genres and main cast'
             : 'Enter a letter to search eligible titles across TMDB'}
         </MuuviText>
         {isSearching ? (
           <View style={styles.searchingPill}>
             <ActivityIndicator color={muuviTheme.colors.pasture} size="small" />
             <MuuviText variant="caption" color="pasture">
-              Checking cast
+              Checking eligible titles
             </MuuviText>
           </View>
         ) : null}

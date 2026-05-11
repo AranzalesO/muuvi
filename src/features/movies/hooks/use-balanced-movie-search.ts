@@ -16,7 +16,9 @@ const CAST_REQUIREMENT = {
   women: 3,
 };
 const DETAIL_CONCURRENCY = 4;
-const TMDB_SEARCH_PAGE_LIMIT = 500;
+const MAX_CANDIDATES_TO_EVALUATE = 60;
+const MAX_ELIGIBLE_RESULTS = 24;
+const TMDB_SEARCH_PAGE_LIMIT = 8;
 
 type EligibilityCacheEntry =
   | {
@@ -36,6 +38,21 @@ export const balancedMovieSearchQueryKeys = {
 
 const getEligibilityCacheKey = (movieId: MovieId, letter: string) =>
   `${letter}:${movieId}`;
+
+const collectEligibleCandidates = (
+  movies: Movie[],
+  letter: string,
+  dedupedMovies: Map<MovieId, Movie>,
+) => {
+  movies
+    .filter((movie) => startsWithLetter(movie, letter))
+    .filter((movie) => hasMinimumGenres(movie, 3))
+    .forEach((movie) => {
+      if (dedupedMovies.size < MAX_CANDIDATES_TO_EVALUATE) {
+        dedupedMovies.set(movie.id, movie);
+      }
+    });
+};
 
 const runWithConcurrency = async <TInput, TOutput>(
   inputs: TInput[],
@@ -63,21 +80,18 @@ const runWithConcurrency = async <TInput, TOutput>(
 const getSearchCandidates = async (letter: string) => {
   const firstPage = await movieRepository.searchMovies(letter, 1);
   const totalPages = Math.min(firstPage.totalPages, TMDB_SEARCH_PAGE_LIMIT);
-  const pages = [firstPage];
-
-  for (let page = 2; page <= totalPages; page += 1) {
-    pages.push(await movieRepository.searchMovies(letter, page));
-  }
-
   const dedupedMovies = new Map<MovieId, Movie>();
 
-  pages
-    .flatMap((page) => page.results)
-    .filter((movie) => startsWithLetter(movie, letter))
-    .filter((movie) => hasMinimumGenres(movie, 3))
-    .forEach((movie) => {
-      dedupedMovies.set(movie.id, movie);
-    });
+  collectEligibleCandidates(firstPage.results, letter, dedupedMovies);
+
+  for (
+    let page = 2;
+    page <= totalPages && dedupedMovies.size < MAX_CANDIDATES_TO_EVALUATE;
+    page += 1
+  ) {
+    const nextPage = await movieRepository.searchMovies(letter, page);
+    collectEligibleCandidates(nextPage.results, letter, dedupedMovies);
+  }
 
   return Array.from(dedupedMovies.values());
 };
@@ -129,9 +143,11 @@ export function useBalancedMovieSearch(searchValue: string) {
 
       return entries
         .filter((entry): entry is Extract<EligibilityCacheEntry, { eligible: true }> => entry.eligible)
-        .map((entry) => entry.movie);
+        .map((entry) => entry.movie)
+        .slice(0, MAX_ELIGIBLE_RESULTS);
     },
     queryKey: balancedMovieSearchQueryKeys.byLetter(letter || 'empty'),
+    retry: 1,
     staleTime: 1000 * 60 * 30,
   });
 }
